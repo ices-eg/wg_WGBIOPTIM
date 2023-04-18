@@ -1,0 +1,11 @@
+species;space;time;technical;commercial_category;factor;threshold
+Parapenaeus longirostris;GSA18;1;OTB;1;0.13;170
+Aristeus antennatus;GSA18;1;OTB;1;0.25;170
+Parapenaeus longirostris;GSA18;1;OTB;2;0.13;170
+Aristeus antennatus;GSA18;1;OTB;2;0.25;170
+Parapenaeus longirostris;GSA18;1;OTB;3;0.0625;170
+Aristeus antennatus;GSA18;1;OTB;3;0.13;170
+Parapenaeus longirostris;GSA18;1;OTB;S;0.0625;170
+Aristeus antennatus;GSA18;1;OTB;S;0.13;170
+Parapenaeus longirostris;GSA19;1;OTB;ALL;0.13;170
+Aristeus antennatus;GSA19;1;OTB;ALL;0.25;170

@@ -1,0 +1,9 @@
+Var1;Var2;Var3;solutions;maxCV;minCV;maxRR;minRR;meanRR;noIterations;min_max
+ALL;1;PS_SPF;12;0.41;0.14;0.45;0;0.2;9;min
+ALL;1;PS_SPF;24;0.27;0.16;0.61;0.35;0.51;10;max
+ALL;2;PS_SPF;10;0.64;0.05;0.14;0;0.03;12;min
+ALL;2;PS_SPF;19;0.21;0.13;0.25;0.09;0.17;5;max
+ALL;3;PS_SPF;14;0.33;0.05;0.45;0.08;0.27;9;min
+ALL;3;PS_SPF;20;0.32;0.2;0.4;0.2;0.3;8;max
+ALL;4;PS_SPF;14;0.82;0.13;0.5;0;0.09;16;min
+ALL;4;PS_SPF;27;0.38;0.25;0.46;0.12;0.24;7;max
