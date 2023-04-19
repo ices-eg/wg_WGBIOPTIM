@@ -68,7 +68,7 @@ if(hierarchy == 1){
 	CA_base$Maturity_scale<-""
 	CA_base$Maturity_stage<-""
 }
-browser()
+
 if(hierarchy == 5){
 	CA_base$Record_type<-"CA"
 	CA_base$Sampling_type<-"M"
