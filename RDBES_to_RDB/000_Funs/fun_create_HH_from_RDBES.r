@@ -1,7 +1,7 @@
 #' Create a HH table from RDBES data
 #'
-#' ATT needs developments for different lower hierarchies  
-#' (as of 20230418 only hierarchy = 1 and hierarchy = 5 specified)
+#' ATT needs developments for different other upper hierarchies  [only 1 and 5 for now] 
+#' ATT needs developments for different lower hierarchies  [only C for now] 
 #'
 #' ATT requires pre-loading of create_RDBES_Id_table
 #'
