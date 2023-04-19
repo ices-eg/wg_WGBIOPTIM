@@ -41,22 +41,14 @@ source("000_Funs/createTableOfRDBESIds.r") # used in RDBEScore but not yet expor
 # Import and handle RDBES objects
 # -------------------------
 
-
-# Data import and loading [Inputs]
+# Import and tweak dummy RDBES data
+	# note: at present the conversion tool assumes lower hierarchy C (all individuals biologically sampled)
 list.files("001_Inputs")
-zipFiles <- c("001_Inputs/HCS_H5_2022_09_30_052520.zip")
-RDBESdataObj <- importRDBESDownloadData(zipFiles)
+RDBESdataObj <- createRDBESDataObject(rdbesExtractPath = "001_Inputs/h1_v_1_19_13") # h1 dummy data 
+RDBESdataObj <- createRDBESDataObject(rdbesExtractPath = "001_Inputs/h5_v_1_19_13") # h5 dummy data 
+if(unique(RDBESdataObj$BV$BVtypeMeas)=="Age") RDBESdataObj$BV$BVtypeMeas<-"LengthTotal"
+
 validateRDBESDataObject(RDBESdataObj, verbose = FALSE)
-
-myFields <- c("DEstratumName")
-myValues <- c("CombGears_20_Cod_Q3")
-
-# myFields <- c('FOarea')
-# myValues <- c('27.3.a.21')
-
-RDBESdataObj <- filterRDBESDataObject(RDBESdataObj, 
-						fieldsToFilter = myFields,
-                        valuesToFilter = myValues )
 
 RDBESdataObj <- findAndKillOrphans(objectToCheck = RDBESdataObj, verbose = FALSE)
 
@@ -64,6 +56,14 @@ RDBESdataObj <- findAndKillOrphans(objectToCheck = RDBESdataObj, verbose = FALSE
 # Generates RDB objects
 # -------------------------
 
+# run for hierarchy 1 example
+newTR<-create_TR_from_RDBES(x=RDBESdataObj, hierarchy = 1)
+newHH<-create_HH_from_RDBES(x=RDBESdataObj, hierarchy = 1)
+newSL<-create_SL_from_RDBES(x=RDBESdataObj, hierarchy = 1, dir_codelists = "001_Inputs/")
+newHL<-create_HL_from_RDBES(x=RDBESdataObj, hierarchy = 1, dir_codelists = "001_Inputs/")
+newCA<-create_CA_from_RDBES(x=RDBESdataObj, hierarchy = 1)
+
+# run for hierarchy 5 example
 newTR<-create_TR_from_RDBES(x=RDBESdataObj, hierarchy = 5)
 newHH<-create_HH_from_RDBES(x=RDBESdataObj, hierarchy = 5)
 newSL<-create_SL_from_RDBES(x=RDBESdataObj, hierarchy = 5, dir_codelists = "001_Inputs/")
