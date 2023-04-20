@@ -35,6 +35,7 @@ library(boot)
 library(RCurl)
 library(dplyr)
 library(tidyr)
+library(raster)
 
 
 ###########################################################################################################
@@ -445,7 +446,63 @@ if(param.age_only==FALSE){
 
   dados_bio_simul<-getAllData("dados_bio_")
   summary(dados_bio_simul)
-
+  
+ ###### MEAN WEIGHT at age
+  table_meanweight<-group_by(dados_bio_simul, age, year, ID_sim,type) %>% summarize(m_wg = mean(wt))
+  
+  for(i in years)
+  {
+    Figweight<- ggplot(data=subset(table_meanweight, year==i),aes(x=factor(age), y=m_wg,fill=factor(type))) +
+      geom_boxplot(outlier.shape =NA)+xlab("age")+ylab("mean weight at age")+scale_color_brewer(palette = "Paired")+ theme_classic()+
+      facet_wrap(~year)+ggtitle(i)+
+      theme(axis.title.y = element_text(size = 14),axis.title.x=element_text(size=14),
+            axis.line = element_line(size = 0.5),axis.text = element_text(size = 10))
+    ggsave(Figweight, file=paste0(output_sub_dir,"Figweight",i,timeInterval,".png"),width=14, height = 10, units="cm")
+  }
+  
+  
+  ###### MEAN WEIGHT at length
+  table_meanweight_Lt<-group_by(dados_bio_simul, Lt, year, ID_sim,type) %>% summarize(m_wg = mean(wt))
+  
+  for(i in years)
+  {
+    Figweight_lt<- ggplot(data=subset(table_meanweight_Lt, year==i),aes(x=as.factor(Lt), y=m_wg,fill=factor(type))) +
+      geom_boxplot(outlier.shape =NA)+xlab("length")+ylab("mean weight at length")+scale_color_brewer(palette = "Paired")+ theme_classic()+
+      facet_wrap(~year)+ggtitle(i)+
+      theme(axis.title.y = element_text(size = 14),axis.title.x=element_text(size=14),
+            axis.line = element_line(size = 0.5),axis.text = element_text(size = 10))
+    ggsave(Figweight_lt, file=paste0(output_sub_dir,"Figweight_lt",i,timeInterval,".png"),width=14, height = 10, units="cm")
+  }
+  
+  
+  ###### SD WEIGHT at age
+  table_sdweight<-group_by(dados_bio_simul, age, year, ID_sim,type) %>% summarize(sdwg = sd(wt))
+  
+  for(i in years)
+  {
+    Figweightsd<- ggplot(data=subset(table_sdweight, year==i),aes(x=factor(age), y=sdwg,fill=factor(type))) +
+      geom_boxplot(outlier.shape =NA)+xlab("age")+ylab("SD weight at age")+scale_color_brewer(palette = "Paired")+ theme_classic()+
+      facet_wrap(~year)+ggtitle(i)+
+      theme(axis.title.y = element_text(size = 14),axis.title.x=element_text(size=14),
+            axis.line = element_line(size = 0.5),axis.text = element_text(size = 10))
+    ggsave(Figweightsd, file=paste0(output_sub_dir,"Figweightsd",i,timeInterval,".png"),width=14, height = 10, units="cm")
+  }
+  
+  
+  ###### CV WEIGHT at age
+  table_cvweight<-group_by(dados_bio_simul, age, year, ID_sim,type) %>% summarize(CVwg = cv(wt))
+  
+  for(i in years)
+  {
+    FigweightCV<- ggplot(data=subset(table_cvweight, year==i),aes(x=factor(age), y=CVwg,fill=factor(type))) +
+      geom_boxplot(outlier.shape =NA)+xlab("age")+ylab("CV weight at age")+scale_color_brewer(palette = "Paired")+ theme_classic()+
+      facet_wrap(~year)+ggtitle(i)+
+      theme(axis.title.y = element_text(size = 14),axis.title.x=element_text(size=14),
+            axis.line = element_line(size = 0.5),axis.text = element_text(size = 10))
+    ggsave(FigweightCV, file=paste0(output_sub_dir,"FigweightCV",i,timeInterval,".png"),width=14, height = 10, units="cm")
+  }
+  
+ 
 
   ####################################################################################################################
   ####################################################################################################################
