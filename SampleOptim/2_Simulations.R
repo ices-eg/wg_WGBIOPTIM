@@ -5,8 +5,8 @@
 ##
 ##   Biological sampling optimization (Script "SampleOptim")
 ##   Developed by: Patricia Goncalves (patricia@ipma.pt)
-##   Last version development period: June 2021
-##   Version: v3.1
+##   Last version development period: may 2023
+##   Version: v4.1
 ##
 ##   Reference:
 ##   Gonçalves, Patrícia 2021. "SampleOptim" a data analysis R-tool to optimize fish sampling for
@@ -256,8 +256,6 @@ vonberPorAno<-function(ano){
 #########################################################################################################
 #########################################################################################################
 ##
-## Definir o número de otólitos por classe de comprimento (nos testes usei o numOtolitsPerClass=1:20; com c(1:10, seq=1); c(10:20, seq=5))
-##
 #numOtolitsPerClass<-3
 #otolitSet<-c(1:10,15,20)
 for(numOtolitsPerClass in otolitSet){
@@ -294,29 +292,39 @@ for(numOtolitsPerClass in otolitSet){
   vb_weight<- sapply(vonber, function(x) x$data$P_INDIVIDUAL)
   vb_month<- sapply(vonber, function(x) x$data$MONTH)
 
+  ###construir a matrix com os dados das vari?veis de cada 1 das 100 amostras(sub-amostras)
+  # ##Dados de ct, idade
   vb_ano_melt<- melt(vb_ano)
   vb_idade_melt <- melt(vb_idade)
   vb_ct_melt<- melt(vb_ct)
+  vb_month_melt<- melt(vb_month)
 
   if(trocas){
 
-    troca_a3<-vb_ano_melt
-    troca_i3<-vb_idade_melt
-    troca_c3<-vb_ct_melt
+    lixo_a3<-vb_ano_melt
+    lixo_i3<-vb_idade_melt
+    lixo_c3<-vb_ct_melt
+    lixo_c4<-vb_month_melt
 
+    lixo_aa3<-cbind(lixo_a3$value, lixo_a3$X2)
+    lixo_ii3<-cbind(lixo_i3$value, lixo_i3$X2)
+    lixo_cc3<-cbind(lixo_c3$value, lixo_c3$X2)
+    lixo_cc4<-cbind(lixo_c4$value, lixo_c4$X2)
+    vb_ano_melt<-as.data.frame(lixo_aa3)
+    vb_idade_melt<-as.data.frame(lixo_ii3)
+    vb_ct_melt<-as.data.frame(lixo_cc3)
+    vb_month_melt<-as.data.frame(lixo_cc4)
 
-    troca_aa3<-cbind(troca_a3$value, troca_a3$X2)
-    troca_ii3<-cbind(troca_i3$value, troca_i3$X2)
-    troca_cc3<-cbind(troca_c3$value, troca_c3$X2)
-    vb_ano_melt<-as.data.frame(troca_aa3)
-    vb_idade_melt<-as.data.frame(troca_ii3)
-    vb_ct_melt<-as.data.frame(troca_cc3)
+  }
 
-      }
-
-  dados_lt_age<-cbind(vb_ct_melt,vb_idade_melt,vb_ano_melt)
-  dados_lt_age<-dados_lt_age[,c(1,3,5,6)]
-  colnames(dados_lt_age)<-c("Lt","age","year","ID_sim")
+  dados_lt_age<-cbind(vb_ct_melt,vb_idade_melt,vb_ano_melt,vb_month_melt)
+  dados_lt_age<-dados_lt_age[,c(1,3,5,7,8)]
+  colnames(dados_lt_age)<-c("Lt","age","year","month","ID_sim")
+  dados_lt_age$quarter<-factor(NA,levels=c("1","2","3","4"))
+  dados_lt_age[dados_lt_age$month<=3,"quarter"]<-"1"
+  dados_lt_age[dados_lt_age$month>3 & dados_lt_age$month<=6,"quarter"]<-"2"
+  dados_lt_age[dados_lt_age$month>6 & dados_lt_age$month<=9,"quarter"]<-"3"
+  dados_lt_age[dados_lt_age$month>9, "quarter"]<-"4"
   dados_lt_age$type<-numOtolitsPerClass
 
 
@@ -334,22 +342,42 @@ for(numOtolitsPerClass in otolitSet){
   vb_predict_melt<-total
   write.table(vb_predict_melt,paste(output_dir,"vb_predict_melt_",numOtolitsPerClass,".csv",sep=""),sep=SEP, row.names=FALSE)
 
+## Bio data
+  vb_wt_melt<-melt(vb_weight) #fish total weight
+  vb_wt_melt<-vb_wt_melt["value"]
+  vb_month_melt<-vb_month_melt[,1:2]
+  vb_ct_melt<-vb_ct_melt[1]
+  vb_idade_melt<-vb_idade_melt[1]
+  vb_ano_melt<-vb_ano_melt[1]
+  dados_bio<-cbind(vb_ct_melt,vb_idade_melt,vb_ano_melt,vb_wt_melt,vb_month_melt)
+  colnames(dados_bio)<-c("Lt","age","year","wt","month","ID_sim")
+  dados_bio$quarter<-factor(NA,levels=c("1","2","3","4"))
+  dados_bio[dados_bio$month<=3,"quarter"]<-"1"
+  dados_bio[dados_bio$month>3 & dados_bio$month<=6,"quarter"]<-"2"
+  dados_bio[dados_bio$month>6 & dados_bio$month<=9,"quarter"]<-"3"
+  dados_bio[dados_bio$month>9, "quarter"]<-"4"
+  dados_bio$type<-numOtolitsPerClass
+  write.table(dados_bio,paste(output_dir, "dados_bio_",numOtolitsPerClass,".csv",sep=""),sep=SEP, row.names=FALSE)
+
+
 #####
   if(param.age_only==FALSE){
-    ##Data of length, age, sex, matutity stage, weight, month and year
+    ##Data of length, age, sex, maturity stage, weight, month and year
+    vb_ct_melt<-vb_ct_melt[1] ## length
+    vb_idade_melt<-vb_idade_melt[1] ##age
+    vb_ano_melt<-vb_ano_melt[1]  ##year
+    vb_month_melt<-vb_month_melt[,1:2]
     vb_sex_melt<-melt(vb_sex) #sex
-    vb_mat_melt<-melt(vb_matur) ##maturuty stage
-    vb_wt_melt<-melt(vb_weight) #fish total weight
-    vb_month_melt<-melt(vb_month) #month
+    vb_sex_melt<-vb_sex_melt["value"]
+    vb_mat_melt<-melt(vb_matur) ##maturity stage
+    vb_mat_melt<-vb_mat_melt["value"]
     dados_bio<-cbind(vb_ct_melt,vb_idade_melt,vb_ano_melt,vb_sex_melt,vb_mat_melt,vb_wt_melt,vb_month_melt)
-    dados_bio<-dados_bio[,c(1,3,5,7,9,11,13,14)]
     colnames(dados_bio)<-c("Lt","age","year","sex","mat_stg","wt","month","ID_sim")
+
     dados_bio$mat_stg<-as.numeric(dados_bio$mat_stg)
+    dados_bio$maturity<-ifelse(dados_bio$mat_stg<param.stage_mature | is.na(dados_bio$mat_stg) , 0, ifelse(dados_bio$mat_stg>=param.stage_mature,1,NA))
 
-    #  dados_bio$maturity<-ifelse(dados_bio$mat_stg==1, 0, ifelse(dados_bio$mat_stg>1,1,NA))
-    dados_bio$maturity<-ifelse(dados_bio$mat_stg<param.stage_mature, 0, ifelse(dados_bio$mat_stg>=param.stage_mature,1,NA))
-
-    dados_bio$quarter<-ifelse(dados_bio$mont<4, 1, ifelse(dados_bio$mat_stg>1,1,NA))
+    #dados_bio$quarter<-ifelse(dados_bio$month<6, 1, ifelse(dados_bio$mat_stg>1,1,NA))
     dados_bio$quarter<-factor(NA,levels=c("1","2","3","4"))
     dados_bio[dados_bio$month<=3,"quarter"]<-"1"
     dados_bio[dados_bio$month>3 & dados_bio$month<=6,"quarter"]<-"2"
@@ -359,8 +387,8 @@ for(numOtolitsPerClass in otolitSet){
     write.table(dados_bio,paste(output_dir, "dados_bio_",numOtolitsPerClass,".csv",sep=""),sep=SEP, row.names=FALSE)
 
 
-    ##############################################################################################
-    ###############################################################################################
+    ###############################################################################
+    ###############################################################################
     ###############################################################################
     ###############################################################################
     ### MATURITY OGIVE
@@ -385,7 +413,7 @@ for(numOtolitsPerClass in otolitSet){
         results[nb,2]<-as.numeric(Lmat[[1]]) #L25
         results[nb,3]<-as.numeric(Lmat[[2]]) #L50
         results[nb,4]<-as.numeric(Lmat[[3]]) #L75
-        results[nb,5]<-nb ##ID_simula??o
+        results[nb,5]<-nb ##ID_simul
         results[nb,6]<-unique(data$type) ##numOtolitsPerClass
       }
       colnames(results)<-c("year","L25","L50","L75","ID_sim","type")
@@ -393,12 +421,11 @@ for(numOtolitsPerClass in otolitSet){
     }
 
     #
-    table_mo<-table_mature(data=dados_bio[dados_bio$quarter=="1",]) ##Com a op??o de s? considerar os dados para 1? trimestre
+    #table_mo<-table_mature(data=dados_bio[dados_bio$quarter=="1",]) ##Only quarter 1
 
-    #table_mo<-table_mature(data=dados_bio) ##com os dados de todo o ano
+    table_mo<-table_mature(data=dados_bio) ##Data from the whole year
     write.table(table_mo,paste(output_dir, "table_res_mo_",numOtolitsPerClass,".csv",sep=""),sep=SEP, row.names=FALSE)
   }
-#####
 
   ####Figure 3 - compare length and age distributions by year (by simulations)
   ##Note: the length distribution did not change by simulations
@@ -407,19 +434,14 @@ for(numOtolitsPerClass in otolitSet){
 
   Fig3_length <- file.path(paste(output_dir, "Fig3_length_", numOtolitsPerClass,"_",timeInterval, ".png", sep = ""))
   png(file=Fig3_length)
-  #  Fig3_length<- ggplot(dados_lt_age[dados_lt_age$age!=33,], aes(x=Lt, colour=factor(ID_sim))) +
-  #geom_density(show.legend = FALSE)+facet_wrap(~ year, ncol=2)+theme_classic()
   Fig3_length<- ggplot(dados_lt_age, aes(x=Lt, colour=factor(ID_sim))) +
                 geom_density(show.legend = FALSE)+facet_wrap(~ year, ncol=2)+theme_classic()
   print(Fig3_length)
   dev.off()
 
-  ## até aqui OK
 
   Fig3_age <- file.path(paste(output_dir, "Fig3_age_", numOtolitsPerClass,"_",timeInterval, ".png", sep = ""))
   png(file=Fig3_age)
-  #  Fig3_age<- ggplot(dados_lt_age[dados_lt_age$age!=33,], aes(x=age, colour=factor(ID_sim))) +
-  #geom_density(show.legend = FALSE)+facet_wrap(~ year, ncol=2)+theme_classic()
   Fig3_age<- ggplot(dados_lt_age, aes(x=age, colour=factor(ID_sim))) +
              geom_density(show.legend = FALSE)+facet_wrap(~ year, ncol=2)+theme_classic()
   print(Fig3_age)
@@ -516,7 +538,7 @@ for(numOtolitsPerClass in otolitSet){
   #################################################################
   ### Growth parameters from the von Bertallanfy model by year
   vb_anounique_melt<- unique(vb_ano_melt)
-  colnames(vb_anounique_melt)<- c("year","ID_sim")
+  colnames(vb_anounique_melt)<- c("year")
   vb_linf_melt <- melt(vb_linf)
   colnames(vb_linf_melt)<- c("Linf","ID_sim")
   vb_k_melt<- melt(vb_k)
@@ -525,8 +547,8 @@ for(numOtolitsPerClass in otolitSet){
   colnames(vb_t0_melt)<- c("t0","ID_sim")
   trimestre_simulvb<- cbind(vb_linf_melt, vb_k_melt, vb_t0_melt,vb_anounique_melt)
   trimestre_simulvb$type<-numOtolitsPerClass
-  colnames(trimestre_simulvb)<- c("Linf","ID_sim","K","ID_sim","t0","ID_sim","year","ID_sim","type")
-  trimestre_simulvb<- trimestre_simulvb[,c(1,3,5,7,8,9)]
+  colnames(trimestre_simulvb)<- c("Linf","ID_sim","K","ID_sim","t0","ID_sim","year","type")
+  trimestre_simulvb<- trimestre_simulvb[,c(1,2,3,5,7,8)]
   write.table(trimestre_simulvb,paste(output_dir, "results_simulvbgm_",numOtolitsPerClass,".csv",sep=""),sep=SEP, row.names=FALSE)
 
 
@@ -564,9 +586,8 @@ for(numOtolitsPerClass in otolitSet){
   #### Von bertallanfy growth model
   svTypical <- list(Linf=60,K=0.1,t0=-3) ##Initial growth parameters
   vbTypical <- Lt~Linf*(1-exp(-K*(age-t0))) ##von Bertallanfy growth model
-  control<- nls.control(maxiter=100000, minFactor = 1/4096, printEval=F)
-  
-  
+  control<- nls.control(maxiter=10000, minFactor = 1/4096, printEval=F)
+
   ###############################################################################
   ###############################################################################
   ### Determining mean square error between sim and obs (cost=mspe, mape, rtmspe)
@@ -601,8 +622,7 @@ for(numOtolitsPerClass in otolitSet){
         next
       }
 
-      ## Linf       K      t0
-      #34.3478  0.2788 -2.2213
+
       mspe_fit<-cvFit(fitTypical,Lt ~ Linf * (1 - exp(-K * (age - t0))),data=data[data$year==years[nb],],y=data$age[data$year==years[nb]], cost=mspe, k=10)
       mape_fit<-cvFit(fitTypical,Lt~Linf*(1-exp(-K*(age-t0))),data=data[data$year==years[nb],],y=data$age[data$year==years[nb]], cost=mape, k=10)
       rtmspe_fit<-cvFit(fitTypical,Lt~Linf*(1-exp(-K*(age-t0))),data=data[data$year==years[nb],],y=data$age[data$year==years[nb]], cost=rtmspe, k=10)
