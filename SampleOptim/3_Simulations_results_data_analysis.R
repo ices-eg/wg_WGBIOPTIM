@@ -5,8 +5,8 @@
 ##
 ##   Biological sampling optimization (Script "SampleOptim")
 ##   Developed by: Patricia Goncalves (patricia@ipma.pt)
-##   Last version development period: June 2021
-##   Version: v3.1
+##   Last version development period: may 2023
+##   Version: v4.1
 ##
 ##   Reference:
 ##   Gonçalves, Patrícia 2019. "SampleOptim" a data analysis R-tool to optimize fish sampling for
@@ -105,14 +105,14 @@ otolitSet<-c(seq(param.min_otol,param.max_otol, by=param.interval_otol), unlist(
 
 ########
 getAllData<-function(tabname){
+  ress<-NULL
   for(n in otolitSet){
     tval<-read.table(paste(output_dir,tabname,n,".csv",sep=""),sep=SEP, header=T)
-    if(exists("res")) res<-rbind(res, tval)
-    else res<-tval
+    ress<-rbind(ress, tval)
   }
-  return(res)
+  return(ress)
 }
-#
+
 
 #### Data of age, length by year (from the individuals selected in each simulation run)
 
@@ -126,8 +126,6 @@ summary(data_selected_lt_age)
 
 simulvbgm_param_year<-getAllData("results_simulvbgm_")
 summary(simulvbgm_param_year)
-
-
 
 ####For all the years, to compare the VGBGM parameters between years
 ####Figure 7 - Summary of parameters by year for the full set of simulations (n=100), for j's (number of selected otoliths)
@@ -162,6 +160,7 @@ print(fig7_Linf)
 dev.off()
 
 
+
 ####################################################################################
 #####  Mean length at age data original and by simulation run
 ###################################################################################
@@ -173,7 +172,7 @@ summary(table_mla_sims)
 ###############################################################################################################
 ###### Figure 8 - compare mean length at age (oringinal versus simulation) by year and simulation run
 #######
-timeInterval<- "T"
+#timeInterval<- "T"
 years<-unique(table_mla_sims$year)
 
 for(i in years)
@@ -187,7 +186,6 @@ for(i in years)
 }
 
 
-################################
 
 ###########################################################################################
 ### Standard deviation from length at age by simualtion run
@@ -198,7 +196,7 @@ for(i in years)
 table_sdla_sims<-getAllData("table_original_simulsub_sd_")
 summary(table_sdla_sims)
 
-###############################################################################################################
+################################################################################################
 ###### Figure 9 - compare the sd length at age (oringinal versus simulation) by year and simulation run
 #######
 #table_sdla_sims<-table_sdla_sims[!is.na(table_sdla_sims$sd_lt),]##remove NAs on data[table_sdla_sims$year==years[[nb]],]
@@ -216,7 +214,7 @@ for(i in years)
 }
 
 
-############################################################################################
+##################################################################################################
 ###
 ### Data combine (table_mla_sims, table_sdla_sims)
 ##################################################################################################
@@ -320,7 +318,8 @@ print(fig10a_mape)
 dev.off()
 
 Fig10a_norm_rtmspe <- file.path(paste(output_dir,"Fig10_norm_rtmspe_", timeInterval, ".png", sep = ""))
-png(file=Fig10a_norm_rtimeIntervalspe)
+### tinha isto png(file=Fig10a_norm_rtimeIntervalspe)
+png(file=Fig10a_norm_rtmspe)
 fig10a_rtmspe<-ggplot(nor_rtmspe, aes(x=factor(type), y=norm_rtmspe, group=1)) + geom_step(stat="summary", fun.y = mean)+
   xlab("number of otoliths selected by length class (cm)")+theme_classic()+
   facet_wrap(~year)+
@@ -372,6 +371,7 @@ dev.off()
 ####### Comparison of von Bertalanffy growth model parameters estimated by year
 ###### and for each j (number of otoliths by length class) the result of the 100 simulations aggregated
 ###################################################################################################################
+
 Fig11_K_VBGM <- file.path(paste(output_dir,"Fig11_K_VBGM_", timeInterval, ".png", sep = ""))
 png(file=Fig11_K_VBGM)
 fig11_K<-ggplot(stats_simul, aes(x=factor(type), y=k)) +
@@ -436,9 +436,9 @@ fig12a_predictLt<-ggplot(data=lpredict_vbsim, aes(x=ID_ind, y=pred_lt,colour=fac
 print(fig12a_predictLt)
 dev.off()
 
-#####
-if(param.age_only==FALSE){
-  ################################################################################################################################
+
+
+  ###############################################################################################################################
   ###############################################################################################################################
   ### Data from biological samples
   ###############################################################################################################################
@@ -446,10 +446,13 @@ if(param.age_only==FALSE){
 
   dados_bio_simul<-getAllData("dados_bio_")
   summary(dados_bio_simul)
-  
+
  ###### MEAN WEIGHT at age
+  dados_bio_simul<- dados_bio_simul[complete.cases(dados_bio_simul$wt),] ##to remove the NAs
+
   table_meanweight<-group_by(dados_bio_simul, age, year, ID_sim,type) %>% summarize(m_wg = mean(wt))
-  
+  years<-unique(table_meanweight$year)
+
   for(i in years)
   {
     Figweight<- ggplot(data=subset(table_meanweight, year==i),aes(x=factor(age), y=m_wg,fill=factor(type))) +
@@ -459,11 +462,28 @@ if(param.age_only==FALSE){
             axis.line = element_line(size = 0.5),axis.text = element_text(size = 10))
     ggsave(Figweight, file=paste0(output_sub_dir,"Figweight",i,timeInterval,".png"),width=14, height = 10, units="cm")
   }
-  
-  
+
+
+  if(timeInterval=="T"){
+
+    table_meanweight<-group_by(dados_bio_simul, age, year, quarter, ID_sim,type) %>% summarize(m_wg = mean(wt))
+
+  for(i in years)
+  {
+    Figweight_quarter<- ggplot(data=subset(table_meanweight, year==i),aes(x=factor(age), y=m_wg,fill=factor(type))) +
+      geom_boxplot(outlier.shape =NA)+xlab("age")+ylab("mean weight at age")+scale_color_brewer(palette = "Paired")+ theme_classic()+
+      facet_grid(quarter~year)+ggtitle(i)+
+      theme(axis.title.y = element_text(size = 14),axis.title.x=element_text(size=14),
+            axis.line = element_line(size = 0.5),axis.text = element_text(size = 10))
+    ggsave(Figweight_quarter, file=paste0(output_sub_dir,"Figweight_quarter",i,timeInterval,".png"),width=14, height = 10, units="cm")
+  }
+
+}
+
   ###### MEAN WEIGHT at length
   table_meanweight_Lt<-group_by(dados_bio_simul, Lt, year, ID_sim,type) %>% summarize(m_wg = mean(wt))
-  
+  years<-unique(table_meanweight_Lt$year)
+
   for(i in years)
   {
     Figweight_lt<- ggplot(data=subset(table_meanweight_Lt, year==i),aes(x=as.factor(Lt), y=m_wg,fill=factor(type))) +
@@ -473,25 +493,58 @@ if(param.age_only==FALSE){
             axis.line = element_line(size = 0.5),axis.text = element_text(size = 10))
     ggsave(Figweight_lt, file=paste0(output_sub_dir,"Figweight_lt",i,timeInterval,".png"),width=14, height = 10, units="cm")
   }
-  
-  
+
+  if(timeInterval=="T"){
+
+    table_meanweight_Lt_quarter<-group_by(dados_bio_simul, Lt, year, quarter, ID_sim,type) %>% summarize(m_wg = mean(wt))
+    write.csv(table_meanweight_Lt_quarter,"output/simulation_results/table_meanweight_Lt_quarter.csv")
+
+    for(i in years)
+    {
+      Figweight_ltquarter<- ggplot(data=subset(table_meanweight_Lt_quarter, year==i),aes(x=as.factor(Lt), y=m_wg,fill=factor(type))) +
+        geom_boxplot(outlier.shape =NA)+xlab("length")+ylab("mean weight at length")+scale_color_brewer(palette = "Paired")+ theme_classic()+
+        facet_grid(quarter~year)+ggtitle(i)+
+        theme(axis.title.y = element_text(size = 14),axis.title.x=element_text(size=14),
+              axis.line = element_line(size = 0.5),axis.text = element_text(size = 10))
+      ggsave(Figweight_ltquarter, file=paste0(output_sub_dir,"Figweight_ltquarter",i,timeInterval,".png"),width=14, height = 10, units="cm")
+    }
+  }
+
   ###### SD WEIGHT at age
-  table_sdweight<-group_by(dados_bio_simul, age, year, ID_sim,type) %>% summarize(sdwg = sd(wt))
-  
+  table_sdweight<-dados_bio_simul  %>% group_by(age, year, ID_sim,type) %>% summarise(sdwt = sd(wt))
+  summary(table_sdweight)
+  years<-unique(table_sdweight$year)
+
   for(i in years)
   {
-    Figweightsd<- ggplot(data=subset(table_sdweight, year==i),aes(x=factor(age), y=sdwg,fill=factor(type))) +
+    Figweightsd<- ggplot(data=subset(table_sdweight, year==i),aes(x=factor(age), y=sdwt,fill=factor(type))) +
       geom_boxplot(outlier.shape =NA)+xlab("age")+ylab("SD weight at age")+scale_color_brewer(palette = "Paired")+ theme_classic()+
       facet_wrap(~year)+ggtitle(i)+
       theme(axis.title.y = element_text(size = 14),axis.title.x=element_text(size=14),
             axis.line = element_line(size = 0.5),axis.text = element_text(size = 10))
     ggsave(Figweightsd, file=paste0(output_sub_dir,"Figweightsd",i,timeInterval,".png"),width=14, height = 10, units="cm")
   }
-  
-  
+
+if(timeInterval=="T"){
+
+  table_sdweight_quarter<-dados_bio_simul  %>% group_by(age, year, quarter, ID_sim,type) %>% summarise(sdwt = sd(wt))
+  write.csv(table_sdweight_quarter,"output/simulation_results/table_sdweight_quarter.csv")
+  for(i in years)
+  {
+    Figweightsd_quarter<- ggplot(data=subset(table_sdweight_quarter, year==i),aes(x=factor(age), y=sdwt,fill=factor(type))) +
+      geom_boxplot(outlier.shape =NA)+xlab("age")+ylab("SD weight at age")+scale_color_brewer(palette = "Paired")+ theme_classic()+
+      facet_grid(quarter~year)+ggtitle(i)+
+      theme(axis.title.y = element_text(size = 14),axis.title.x=element_text(size=14),
+            axis.line = element_line(size = 0.5),axis.text = element_text(size = 10))
+    ggsave(Figweightsd_quarter, file=paste0(output_sub_dir,"Figweightsd_quarter",i,timeInterval,".png"),width=14, height = 10, units="cm")
+  }
+}
+
+
   ###### CV WEIGHT at age
   table_cvweight<-group_by(dados_bio_simul, age, year, ID_sim,type) %>% summarize(CVwg = cv(wt))
-  
+  years<-unique(table_cvweight$year)
+
   for(i in years)
   {
     FigweightCV<- ggplot(data=subset(table_cvweight, year==i),aes(x=factor(age), y=CVwg,fill=factor(type))) +
@@ -501,15 +554,29 @@ if(param.age_only==FALSE){
             axis.line = element_line(size = 0.5),axis.text = element_text(size = 10))
     ggsave(FigweightCV, file=paste0(output_sub_dir,"FigweightCV",i,timeInterval,".png"),width=14, height = 10, units="cm")
   }
-  
- 
+
+
+  if(timeInterval=="T"){
+    table_cvweight_quarter<-group_by(dados_bio_simul, age, year, quarter, ID_sim,type) %>% summarize(CVwg = cv(wt))
+    write.csv(table_cvweight_quarter,"output/simulation_results/table_cvweight_quarter.csv")
+
+    for(i in years)
+    {
+      FigweightCV_quarter<- ggplot(data=subset(table_cvweight_quarter, year==i),aes(x=factor(age), y=CVwg,fill=factor(type))) +
+        geom_boxplot(outlier.shape =NA)+xlab("age")+ylab("CV weight at age")+scale_color_brewer(palette = "Paired")+ theme_classic()+
+        facet_grid(quarter~year)+ggtitle(i)+
+        theme(axis.title.y = element_text(size = 14),axis.title.x=element_text(size=14),
+              axis.line = element_line(size = 0.5),axis.text = element_text(size = 10))
+      ggsave(FigweightCV_quarter, file=paste0(output_sub_dir,"FigweightCV_quarter",i,timeInterval,".png"),width=14, height = 10, units="cm")
+    }
+  }
 
   ####################################################################################################################
   ####################################################################################################################
   ##### Data from the maturity ogive model adjustment
   ###################################################################################################################
   ####################################################################################################################
-
+  if(param.age_only==FALSE){
 
   dados_mo_simul<-getAllData("table_res_mo_")
   summary(dados_mo_simul)
@@ -517,14 +584,14 @@ if(param.age_only==FALSE){
 
   dados_mo_re <- dados_mo_simul %>% gather(type_mat, L_mean, L25:L75)
 
-  years<- sort(unique(dados_mo_re$year)) ##list of years on the samples data
+  years<- unique(dados_mo_re$year) ##list of years on the samples data
 
-  for(bb in 1:length(years))
+  for(i in years)
   {
-    Figmo <- file.path(paste(output_sub_dir,"FigmoLt_", years[bb], ".png", sep = ""))
+    Figmo <- file.path(paste(output_sub_dir,"FigmoLt_", i, ".png", sep = ""))
     png(file=Figmo)
     plotmo<-
-      ggplot(dados_mo_re[dados_mo_re$year==years[bb],], aes(x=factor(type),y=L_mean, fill=type_mat))+xlab("Number of otoliths selected by length class (cm)")+ ylab("Length")+
+      ggplot(dados_mo_re[dados_mo_re$year==i,], aes(x=factor(type),y=L_mean, fill=type_mat))+xlab("Number of otoliths selected by length class (cm)")+ ylab("Length")+
       geom_boxplot()+ theme_classic() +
       theme(axis.title.y = element_text(size = 14),axis.title.x=element_text(size=14),
             axis.line = element_line(size = 0.5),axis.text = element_text(size = 10))
@@ -536,12 +603,12 @@ if(param.age_only==FALSE){
 
 
 
-  for(bb in 1:length(years))
+  for(i in years)
   {
-    Figmo_sna <- file.path(paste(output_sub_dir,"Figmo_snaLt_", years[bb], ".png", sep = ""))
+    Figmo_sna <- file.path(paste(output_sub_dir,"Figmo_snaLt_", i, ".png", sep = ""))
     png(file=Figmo_sna)
     plotmo_sna<-
-      ggplot(dados_mo_re[dados_mo_re$year==years[bb],], aes(x=factor(type),y=L_mean, fill=type_mat))+xlab("Number of otoliths selected by length class (cm)")+ ylab("Length")+
+      ggplot(dados_mo_re[dados_mo_re$year==i,], aes(x=factor(type),y=L_mean, fill=type_mat))+xlab("Number of otoliths selected by length class (cm)")+ ylab("Length")+
       geom_boxplot(outlier.shape = NA)+ theme_classic() +
       theme(axis.title.y = element_text(size = 14),axis.title.x=element_text(size=14),
             axis.line = element_line(size = 0.5),axis.text = element_text(size = 10))
@@ -556,3 +623,4 @@ if(param.age_only==FALSE){
 #############################     END CODE ;)    ###########################################################
 ###########################################################################################################
 ###########################################################################################################
+
