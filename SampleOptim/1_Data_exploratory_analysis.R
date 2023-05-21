@@ -47,21 +47,22 @@ dir.create(output_dir, showWarnings = FALSE)
 data<-read.table("SampleOptim_input_fileformat_example.csv",sep=";", header=T)
 
  data_samplebio<- data %>%
-   rename(
-#     ID_BIO_FISH = ID_BIO_PEIXES, ### this column needs to be created corresponds to the number of the line
-      DATA = date,
-      MONTH = Month,
-      ANO = Year,
-      COD_FAO = Species,
-      PORTO_NOME = Port,
-      C_CLASSE = LengthClass,
-      P_INDIVIDUAL = Weight,
-      SEXO = Sex,
-      EST_MATURACAO = MaturityStage,
-      IDADE = Age)
+  rename(
+     ID_BIO_PEIXES = ID_BIO_FISH, ### this column needs to be created corresponds to the number of the line
+     DATA = date,
+     MONTH = Month,
+     ANO = Year,
+     COD_FAO = Species,
+     PORTO_NOME = Port,
+     C_CLASSE = LengthClass,
+     P_INDIVIDUAL = Weight,
+     SEXO = Sex,
+     EST_MATURACAO = MaturityStage,
+     IDADE = Age)
 
 SEP<-","
 DATA_COL_NAME<-"data_fin"
+
 
 #########################################################################################################
 #### 1. Data Preliminary analysis: (Exploratory analysis)
