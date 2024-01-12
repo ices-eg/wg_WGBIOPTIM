@@ -1,16 +1,14 @@
 #### The script defines original data set.
-#### Inputs: HL, HH and SL tables (data.hl, data.sl, data.hh), as well as selected species, country, metier, year, quarter etc., and also desired (if any) bin width = delta
+#### Inputs: HL, HH and SL tables (data.hl, data.sl, data.hh, data.sp), as well as selected species, country, metier, year, quarter etc., and also desired (if any) bin width = delta
 #### Outputs: desired data set + 2 histogram plots (with bin width = 1 cm and bin width = delta > 1 cm)
 #### Remarks: input tables can be in DATRAS format as well as alternative format 
 
-
-
-
 setData <- function(data.hl, data.sl, data.hh, 
 #data.cl,
+data.sp,
 selected.species, selected.country, selected.year, 
 selected.quarter, selected.area, selected.metier, selected.sampType, 
-level="trip", delta=1)
+LengthClass_Type,level="trip", delta=1)
 
 {
 
@@ -49,7 +47,7 @@ defined.hh <- c("Record_type", "Sampling_type","Landing_country","Vessel_flag_co
 "Date","Time","Fishing_duration","Pos_Start_Lat_Dec",       
 "Pos_Start_Lon_Dec","Pos_Stop_Lat_Dec","Pos_Stop_Lon_Dec","Area",
 "Statistical_rectangle","Sub_polygon","Main_fishing_depth","Main_water_depth",       
-"FAC_National","FAC_EC_lvl5","FAC_EC_lvl6","Mesh_size",      
+"FAC_National","FAC_EC_lvl5","FAC_EC_lvl6","Gear_type","Mesh_size",      
 "Selection_device","Mesh_size_selection_device");
 
 colnames(data.hh)[colnames(data.hh) %in% datras.col] <- c("Sampling_type","Landing_country","Vessel_flag_country",
@@ -90,19 +88,9 @@ data.sl <- data.sl[,c(n.sl)];
 data.hl <- data.hl[,c("Sampling_type","Year","Trip_number","Vessel_flag_country","Landing_country","Species",
 "Station_number","Landing_category","Catch_category","Length_class","Number_at_length")];
 
-##### Definition of a new column (ASFIS-Code). Needed if we have only WORMS-Code of Species. Alternatively, we would need an additional 
-#### table with species names/WORMS-codes
+##### Definition of a new column (ASFIS-Code). Needed a table data.sp with Species (WORMS-Code or species names); Species_code (ASFIS-Code).
 
-data.hl$Species_code <- rep(NA,nrow(data.hl));
-
-data.hl$Species <- as.character(data.hl$Species)
-
-data.hl$Species_code <- ifelse((data.hl$Species==127143 | data.hl$Species=="Pleuronectes platessa"), "PLE", 
-				ifelse((data.hl$Species==127160 | data.hl$Species=="Solea solea"), "SOL", 
-				ifelse((data.hl$Species==126436 | data.hl$Species=="Gadus morhua"), "COD",
-				ifelse((data.hl$Species==126437 | data.hl$Species=="Melanogrammus aeglefinus"), "HAD",
-				ifelse((data.hl$Species==127139 | data.hl$Species=="Limanda limanda"), "DAB",
-				data.hl$Species)))));
+data.hl <- merge(data.hl,data.sp, all.x =TRUE)
 
 
 ################ Final data set species consists of combination of HL, SL and HH, might be extended for CA #####
@@ -172,7 +160,17 @@ species <- subset(species, !is.na(Quarter))
 
 ###### Data cleaning ##################################
 
-species$LengthClass_cm <- round(as.numeric(species$Length_class)/10);
+##Taking into account the unit of measurement of the species
+
+if (LengthClass_Type == "cm") {
+  species$LengthClass_cm <- floor(as.numeric(species$Length_class) / 10)
+} else if (LengthClass_Type == "scm") {
+  # Redondear al medio centímetro
+  species$LengthClass_cm <- floor(as.numeric(species$Length_class) / 10 * 2) / 2
+} else {
+  # Si LengthClass_Type es "mm" o cualquier otro valor, no hacer nada
+  species$LengthClass_cm <- as.numeric(species$Length_class)
+}
 
 #########################################################################################################################################################################
 ######## RAISING STEP # 1: Raising at haul level ########################################################################################################################
