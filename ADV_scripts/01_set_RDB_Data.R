@@ -163,13 +163,20 @@ species <- subset(species, !is.na(Quarter))
 ##Taking into account the unit of measurement of the species
 
 if (LengthClass_Type == "cm") {
+  # Round to a centimeter
   species$LengthClass_cm <- floor(as.numeric(species$Length_class) / 10)
 } else if (LengthClass_Type == "scm") {
-  # Redondear al medio centímetro
+  # Round to half a centimeter
   species$LengthClass_cm <- floor(as.numeric(species$Length_class) / 10 * 2) / 2
+} else if (LengthClass_Type == "25 mm") {
+  # Round to 2.5 centimeter
+  species$LengthClass_cm <- floor(as.numeric(species$Length_class) / 25) / 2.5
+} else if (LengthClass_Type == "5 cm") {
+  # Round to 5 centimeter
+  species$LengthClass_cm <- floor(as.numeric(species$Length_class) / 50) / 5
 } else {
-  # Si LengthClass_Type es "mm" o cualquier otro valor, no hacer nada
-  species$LengthClass_cm <- as.numeric(species$Length_class)
+  # If LengthClass_Type is "mm" or any other value, just pass it to cm without rounding
+  species$LengthClass_cm <- as.numeric(species$Length_class)/10
 }
 
 #########################################################################################################################################################################
