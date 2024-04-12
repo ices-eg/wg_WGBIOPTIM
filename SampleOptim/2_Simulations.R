@@ -585,7 +585,7 @@ for(numOtolitsPerClass in otolitSet){
   dev.off()
 
   #### Von bertallanfy growth model
-  svTypical <- list(Linf=60,K=0.1,t0=-3) ##Initial growth parameters
+  svTypical <- list(Linf=Linf,K=K,t0=t0) ##Initial growth parameters
   vbTypical <- Lt~Linf*(1-exp(-K*(age-t0))) ##von Bertallanfy growth model
   control<- nls.control(maxiter=10000)
 
