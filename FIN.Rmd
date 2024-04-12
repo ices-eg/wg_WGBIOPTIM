@@ -1,0 +1,41 @@
+---
+title: "FIN Survey data / Biotic data "
+output: html_notebook
+---
+
+rm(list=ls())
+
+Load survey data.
+
+```{r}
+CA <- read.csv2("data/2015_FIN_survey_CA.txt", sep=",")
+HH <- read.csv2("data/2015_FIN_survey_HH.txt", sep=",")
+HL <- read.csv2("data/2015_FIN_survey_HL.txt", sep=",")
+
+```
+
+Source the transform function.
+```{r}
+source("biotic_to_ca.R");
+
+```
+Call the function and write output.
+```{r}
+byList <- list("CruiseLocalID","HaulNumber","CatchSpeciesCode");
+bioLength = "BiologyLengthClass";
+catchLength = "CatchLengthClass";
+catchNumber = "CatchNumberAtLength";
+
+simulatedCA = biotic_to_ca(CA, HL, by=byList, bioLength=bioLength,catchLength = catchLength, catchNumber=catchNumber);
+
+
+
+simulatedCA$BiologyIndividualAge <- ifelse(!is.na(simulatedCA$BiologyIndividualAge) & simulatedCA$BiologyIndividualAge == 99, NA, simulatedCA$BiologyIndividualAge)
+
+filteredCA <- simulatedCA[is.element(simulatedCA$CatchSpeciesCode, c("126417")),]
+
+write.csv2(x=simulatedCA, file="CA_out.csv");
+write.csv2(x=filteredCA, file="CA_HER_cleaned_out.csv");
+
+```
+
