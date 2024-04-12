@@ -264,7 +264,8 @@ for(numOtolitsPerClass in otolitSet){
   
   svTypical <- list(Linf=Linf,K=K,t0=t0) ##Initial parameters values for the growth curve
   vbTypical <- C_CLASSE~Linf*(1-exp(-K*(IDADE-t0))) ##von Bertallanfy growth model
-  control<- nls.control(maxiter=10000, minFactor = 1/4096, printEval=F)
+ #control<- nls.control(maxiter=10000, minFactor = 1/4096, printEval=F)
+  control<- nls.control(maxiter=10000)
  
   vonber<-sapply(anos, vonberPorAno)
 
@@ -586,7 +587,7 @@ for(numOtolitsPerClass in otolitSet){
   #### Von bertallanfy growth model
   svTypical <- list(Linf=60,K=0.1,t0=-3) ##Initial growth parameters
   vbTypical <- Lt~Linf*(1-exp(-K*(age-t0))) ##von Bertallanfy growth model
-  control<- nls.control(maxiter=10000, minFactor = 1/4096, printEval=F)
+  control<- nls.control(maxiter=10000)
 
   ###############################################################################
   ###############################################################################
