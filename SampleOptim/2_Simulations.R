@@ -7,6 +7,7 @@
 ##   Developed by: Patricia Goncalves (patricia@ipma.pt)
 ##   Last version development period: may 2023
 ##   Version: v4.1
+##   Updated: 18 april 2024
 ##
 ##   Reference:
 ##   Gonçalves, Patrícia 2021. "SampleOptim" a data analysis R-tool to optimize fish sampling for
@@ -274,7 +275,7 @@ for(numOtolitsPerClass in otolitSet){
   ######################################
   #extracting the variables from each of the 100 samples (subsamples)
   #
-
+  vb_ano_x100<- sapply(vonber, function(x) x$ANO)
   vb_ano<- sapply(vonber, function(x) x$data$ANO)
   trocas<-typeof(vb_ano)!="list"
 
@@ -538,7 +539,7 @@ for(numOtolitsPerClass in otolitSet){
   ################################################################
   #################################################################
   ### Growth parameters from the von Bertallanfy model by year
-  vb_anounique_melt<- unique(vb_ano_melt)
+  vb_anounique_melt<-melt(vb_ano_x100)
   colnames(vb_anounique_melt)<- c("year")
   vb_linf_melt <- melt(vb_linf)
   colnames(vb_linf_melt)<- c("Linf","ID_sim")
