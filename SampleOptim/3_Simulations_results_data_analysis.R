@@ -153,7 +153,7 @@ Fig7_Linf_VBGM <- file.path(paste(output_dir,"Fig7_Linf_VBGM_", timeInterval, ".
 png(file=Fig7_Linf_VBGM)
 fig7_Linf<-ggplot(simulvbgm_param_year, aes(x=factor(type), y=Linf, fill=factor(type))) +
   geom_boxplot(outlier.shape=NA)+xlab("number of otoliths selected by length class (cm)")+theme_classic()+
-  facet_wrap(~year)+#ylim(c(20,100))+
+  facet_wrap(~year)+ ylim(c(20,100))+
   theme(axis.title.y = element_text(size = 14),axis.title.x=element_text(size=14),
         axis.line = element_line(size = 0.5),axis.text = element_text(size = 10))
 print(fig7_Linf)
