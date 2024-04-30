@@ -1,5 +1,5 @@
-# WKBIOPTIM4
-Fourth Workshop on Optimization of Biological Sampling
+# WGBIOPTIM
+Working group on Optimization of Biological Sampling
 
 ## Installation
 
@@ -10,7 +10,7 @@ You can install `BIOPTIMtools` by running this code in `R`:
 install.packages("devtools")
 
 # Install BIOPTIMtools
-devtools::install_github("ices-eg/WKBIOPTIM4")
+devtools::install_github("https://github.com/ices-eg/wg_WGBIOPTIM/tree/main")
 ```
 
 ## Example
