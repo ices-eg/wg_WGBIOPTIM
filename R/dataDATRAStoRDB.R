@@ -1,4 +1,4 @@
-#' dataRDBEStoRDB
+#' dataDATRAStoRDB
 #'
 #' @param isurvey contains survey name (E.g. "BTS","BITS","NS-IBTS")  to get a list of available surveys: icesDatras::getSurveyList()
 #' @param iyears contains years of interest (E.g. 2020 or 2020:2021)
@@ -9,7 +9,7 @@
 #' @export
 #'
 #' @examples
-#'dataDATRAStoRDB("BTS",2021,3,"BE")
+#'dataDATRAStoRDB("BTS",2021,1:4,"BE")
 #'
 
 dataDATRAStoRDB <- function(isurvey,iyears,iquarters,icountry)
@@ -18,22 +18,39 @@ dataDATRAStoRDB <- function(isurvey,iyears,iquarters,icountry)
   
   
 # Load packages
-require(icesDatras)
 require(dplyr)
+
+require(icesDatras)
+    if (!require(icesDatras)) {
+    # Handle the case where icesDatras is not installed
+    library(devtools)
+    install.packages("icesDatras")
+    library(icesDatras)
+    }
 require(vmstools)
-if (!require(vmstools)) {
-    # Handle the case where ggplot2 is not installed
-  library(devtools)
-  install_github("nielshintzen/vmstools/vmstools/")
-  library(vmstools)
-  }
-  
+    if (!require(vmstools)) {
+    # Handle the case where vmstools is not installed
+    library(devtools)
+    install_github("nielshintzen/vmstools/vmstools/")
+    library(vmstools)
+    }
+
+require(icesVocab)
+    if (!require(icesVocab)) {
+    # Handle the case where icesVocab is not installed
+    library(devtools)
+    install.packages("icesVocab")
+    library(icesVocab)
+    }
   
   
 # Retrieve the data from DATRAS
 print("downloading data from https://datras.ices.dk/WebServices/, this might take awhile")
 hh_data <- getDATRAS(record = "HH", survey = isurvey, years = iyears, quarters = iquarters)%>%
 filter(Country == icountry)
+if (nrow(hh_data) == 0) {
+  stop("No HH data, probably incorrect country code or no data for a given survey x year x quarter x country combination")
+}
 print("Downloaded hh data from DATRAS")
 hl_data <- getDATRAS(record = "HL", survey = isurvey, years = iyears, quarters = iquarters)%>%
 filter(Country == icountry)
@@ -41,6 +58,25 @@ print("Downloaded hl data from DATRAS")
 ca_data <- getDATRAS(record = "CA", survey = isurvey, years = iyears, quarters = iquarters)%>%
 filter(Country == icountry)
 print("Downloaded ca data from DATRAS")
+
+#  replace AphiaID with FAO codes
+FAOcodes <- getCodeList("SpecASFIS")
+FAOcodes <- FAOcodes %>%
+  rename_at("Description",~"Scientific") %>%
+  rename_at("Key",~"FAO")
+FAOcodes<-FAOcodes[,c(2,3)]
+
+Aphiacodes <- getCodeList("SpecWoRMS")
+Aphiacodes <- Aphiacodes %>%
+  mutate("SpecCode" = as.integer(Key))%>%
+  rename_at("Description",~"Scientific")
+Aphiacodes<-Aphiacodes[,c(3,7)]
+
+Aphiacodes <-Aphiacodes %>% left_join(FAOcodes,by= "Scientific",relationship = "many-to-many")
+
+hl_data<-hl_data  %>% left_join(Aphiacodes,by= "SpecCode",relationship = "many-to-many")
+hl_data<-hl_data[!is.na(hl_data$FAO),]  # remove (mainly invertebrate) species which do not have FAO codes in the ICES codelist
+ca_data<-ca_data  %>% left_join(Aphiacodes,by= "SpecCode",relationship = "many-to-many")
 
 
 ########################## HH ###################
@@ -96,7 +132,7 @@ HL$Year <- hl_data$Year
 HL$Project <- hl_data$Survey
 HL$Trip_number <- paste(hl_data$Country,hl_data$Survey,hl_data$Year,sep="_")
 HL$Station_number <- hl_data$StNo
-HL$Species <- hl_data$Valid_Aphia
+HL$Species <- hl_data$FAO
 HL$Catch_category <- ''
 HL$Landing_category <-''
 HL$Comm_size_cat_scale <- ''
@@ -121,7 +157,7 @@ SL$Year <- hl_data$Year
 SL$Project <- hl_data$Survey
 SL$Trip_number <- paste(hl_data$Country,hl_data$Survey,hl_data$Year,sep="_")
 SL$Station_number <- hl_data$StNo
-SL$Species <- hl_data$Valid_Aphia
+SL$Species <- hl_data$FAO
 SL$Catch_category <- ''
 SL$Landing_category <- ''
 SL$Comm_size_cat_scale <- ''
@@ -152,7 +188,7 @@ hh_data$Trip_number_StNo <-  paste(hh_data$Country,hh_data$Survey,hh_data$Year,h
 ca_data$Trip_number_StNo <-  paste(ca_data$Country,ca_data$Survey,ca_data$Year,ca_data$StNo,sep="_")
 ca_data$Month <- hh_data$Month[match(ca_data$Trip_number_StNo,hh_data$Trip_number_StNo)]
 CA$Month<-ca_data$Month
-CA$Species <- ca_data$Valid_Aphia
+CA$Species <- ca_data$FAO
 CA$Sex <- ca_data$Sex
 CA$Catch_category <- ''
 CA$Landing_category <-'' 
