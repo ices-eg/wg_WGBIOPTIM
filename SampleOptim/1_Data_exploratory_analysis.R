@@ -5,8 +5,8 @@
 ##
 ##   Biological sampling optimization (Script "SampleOptim")
 ##   Developed by: Patricia Goncalves (patricia@ipma.pt)
-##   Last version development period: June 2021
-##   Version: v3.1
+##   Last version development period: June 2025
+##   Version: v5.1
 ##
 ##   Reference:
 ##   Gonçalves, Patrícia 2019. "SampleOptim" a data analysis R-tool to optimize fish sampling for
@@ -138,3 +138,4 @@ for(nb in 1: length(years)){
 #########################################################################################################
 #########################################################################################################
 #########################################################################################################
+
