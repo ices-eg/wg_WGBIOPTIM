@@ -10,7 +10,7 @@
 ##   Updated: 18 april 2024
 ##
 ##   Reference:
-##   Gonçalves, Patrícia 2021. "SampleOptim" a data analysis R-tool to optimize fish sampling for
+##   Gonçalves, Patrícia 2025. "SampleOptim" a data analysis R-tool to optimize fish sampling for
 ##   biological parameters as input on fish stock assessment.
 ##
 ##
@@ -647,3 +647,4 @@ for(numOtolitsPerClass in otolitSet){
 }
 ######################################## END Simulations ##################################################
 ###########################################################################################################
+
