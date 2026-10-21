@@ -8,6 +8,11 @@
 
 masterTable <- function(RDBESObject)
 {
+
+  require(dplyr)
+  require(purrr)
+  require(RDBEScore)
+
   
   hierarchy <- unique(RDBESObject$DE$DEhierarchy)
   
