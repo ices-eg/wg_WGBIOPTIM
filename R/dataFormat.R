@@ -1,13 +1,13 @@
 ### format: RDB, RDBES, CS_CL (more options?)
 ## WGBIOPTIM_tool: ADV, SampleOptim, SDTool, BioSim (more options?)
-### If RDBES: use as input RDBES_object and run before the function masterTable()
+### If format = RDBES and WGBIOPTIM_tool = ADV: use as input RDBES_object and run before the function masterTable()
 
 dataFormat <- function(format = NULL, input_data, WGBIOPTIM_tool)
 {
-  if (!is.null(format) && format=="RDBES")
+  if (!is.null(format) && format=="RDBES" && WGBIOPTIM_tool=="ADV")
     
   {
-    ### ouput_data is a list of tables: sampleData, lengthData, biologicalData
+    ### ouput_data is a list of tables prodced by the function masterTable(): sampleData, lengthData, biologicalData
     output_data <- masterTable(input_data)
     
   } else if (!is.null(format) && format=="RDB")
