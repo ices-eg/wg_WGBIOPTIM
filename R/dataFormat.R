@@ -1,4 +1,4 @@
-### format: RDB, RDBES, CS_CL (more options?)
+### format: RDB, RDBES, CS_CL, DATRAS (more options?)
 ## WGBIOPTIM_tool: ADV, SampleOptim, SDTool, BioSim (more options?)
 ### If format = RDBES and WGBIOPTIM_tool = ADV: use as input RDBES_object and run before the function masterTable()
 
@@ -43,7 +43,11 @@ dataFormat <- function(format = NULL, input_data, WGBIOPTIM_tool)
       write_csv = TRUE,
       out_dir = getwd()
     )
-    
+
+  } else if (!is.null(format) && format=="DATRAS" && WGBIOPTIM_tool=="SampleOptim")
+
+  {
+  output_data <- dataDATRAStoSampleOptim(input_data)
   } else { 
           output_data <- NULL
           message("Please define your input data format")
