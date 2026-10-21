@@ -1,7 +1,8 @@
 ### format: RDB, RDBES, CS (more options?)
+## WGBIOPTIM_tool: ADV, SampleOptim, SDTool, BioSim (more options?)
 ### If RDBES: use as input RDBES_object and run before the function masterTable()
 
-dataFormat <- function(format = NULL, input_data)
+dataFormat <- function(format = NULL, input_data, WGBIOPTIM_tool)
 {
   if (!is.null(format) && format=="RDBES")
     
