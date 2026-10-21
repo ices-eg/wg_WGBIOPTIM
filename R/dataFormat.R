@@ -21,17 +21,28 @@ dataFormat <- function(format = NULL, input_data, WGBIOPTIM_tool)
   {
        output_data1 <- SDTool::convert_cs_to_costCS(
       input_data[[1]],
-      write_csv = TRUE,
+      write_csv = FALSE,
+         write_rds=TRUE,
       out_dir = getwd()
     )
     
     output_data2 <- SDTool::convert_cl_to_costCL(
       input_data[[2]],
-      write_csv = TRUE,
+      write_csv = FALSE,
+       write_rds=TRUE,
       out_dir = getwd()
     )
 
     output_data=list(output_data1,output_data2)
+    
+   } else if (!is.null(format) && format=="CS_CL" && WGBIOPTIM_tool=="BioSim")
+    
+  {  
+ output_data <- SDTool::convert_cs_to_costCS(
+      input_data[[1]],
+      write_csv = TRUE,
+      out_dir = getwd()
+    )
     
   } else { 
           output_data <- NULL
